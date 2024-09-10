@@ -67,6 +67,9 @@ Application::Application(GLFWwindow *window) : m_window(window) {
 
   // Set the camera in the scene
   m_camera = Camera();
+  m_camera.setPosition(glm::vec3(0.0, 0.0, m_distance));
+  m_camera.setDirection(glm::vec3(0.0, 0.0, -1.0));
+  m_camera.setUp(glm::vec3(0.0, 1.0, 0.0));
 }
 
 void Application::render() {
@@ -91,9 +94,6 @@ void Application::render() {
   mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
   // Set the camera in the scene
-  m_camera.setPosition(glm::vec3(0.0, 0.0, m_distance));
-  m_camera.setDirection(glm::vec3(0.0, 0.0, -1.0));
-  m_camera.setUp(glm::vec3(0.0, 1.0, 0.0));
   m_camera.setProjectionMatrix(proj);
 
   glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
@@ -127,6 +127,17 @@ void Application::renderGUI() {
       rgba_image::screenshot(true);
 
     ImGui::Separator();
+  }
+
+  // Render Technique
+  if (ImGui::CollapsingHeader("Render Technique")) {
+    if (ImGui::Button("Test Technique")) {
+      m_renderer.setTechnique(new TestTechnique());
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Photon Mapping")) {
+      m_renderer.setTechnique(new PhotonMapping());
+    }
   }
 
   // finish creating window
