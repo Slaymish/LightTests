@@ -46,9 +46,6 @@ private:
   bool m_show_grid = false;
   bool m_showWireframe = false;
 
-  // geometry
-  basic_model m_model;
-
   Renderer m_renderer;
   Scene m_scene;
   Camera m_camera;

@@ -10,6 +10,7 @@
 
 // project
 #include "PhotonMapping.hpp"
+#include "TestTechnique.hpp"
 #include "application.hpp"
 #include "cgra/cgra_geometry.hpp"
 #include "cgra/cgra_gui.hpp"
@@ -43,21 +44,19 @@ Application::Application(GLFWwindow *window) : m_window(window) {
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   GLuint shader = sb.build();
 
-  m_model.shader = shader;
-  m_model.mesh =
-      load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
-          .build();
-  m_model.color = vec3(0.2);
-
   // Initialize the scene and renderer
   m_renderer.initialize();
 
   // Optionally set a lighting technique (e.g., PhotonMapping)
-  m_renderer.setTechnique(new PhotonMapping());
+  m_renderer.setTechnique(new TestTechnique());
 
   // Add an object to the scene
   Object *newObject = new Object();
-  newObject->setMaterial(new Material());
+  newObject->setMaterial(new Material(shader, std::string("Basic Material")));
+  newObject->setMesh(
+      load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj"))
+          .build());
+
   m_scene.addObject(newObject);
 
   // Add a light to the scene
@@ -81,8 +80,8 @@ void Application::render() {
              height); // set the viewport to draw to the entire window
 
   // clear the back-buffer
-  // glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
-  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // enable flags for normal/forward rendering
   glEnable(GL_DEPTH_TEST);
@@ -91,29 +90,13 @@ void Application::render() {
   // projection matrix
   mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
-  // view matrix
-  mat4 view = translate(mat4(1), vec3(0, 0, -m_distance)) *
-              rotate(mat4(1), m_pitch, vec3(1, 0, 0)) *
-              rotate(mat4(1), m_yaw, vec3(0, 1, 0));
-
-  // helpful draw options
-  if (m_show_grid)
-    drawGrid(view, proj);
-  if (m_show_axis)
-    drawAxis(view, proj);
-  glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
-
-  // draw the model
-  m_model.draw(view, proj);
-
-  glm::mat4 projMatrix = glm::perspective(
-      glm::radians(45.0f), m_windowsize.x / m_windowsize.y, 0.1f, 1000.0f);
-
   // Set the camera in the scene
   m_camera.setPosition(glm::vec3(0.0, 0.0, m_distance));
   m_camera.setDirection(glm::vec3(0.0, 0.0, -1.0));
   m_camera.setUp(glm::vec3(0.0, 1.0, 0.0));
-  m_camera.setProjectionMatrix(projMatrix);
+  m_camera.setProjectionMatrix(proj);
+
+  glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
   // Call the renderer to render the scene
   m_renderer.renderFrame(m_scene, m_camera);
@@ -129,23 +112,6 @@ void Application::renderGUI() {
   ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-  // m_model
-  if (ImGui::CollapsingHeader("Model")) {
-    // color selector
-    ImGui::ColorEdit3("Color", &m_model.color[0]);
-
-    // model transform
-    ImGui::Text("Model Transform");
-    ImGui::SliderFloat3("Translation", &m_model.modelTransform[3][0], -10, 10);
-
-    // reset button
-    if (ImGui::Button("Reset Transform"))
-      m_model.modelTransform = mat4(1);
-
-    // separator
-    ImGui::Separator();
-  }
-
   // display current camera parameters
 
   // ImGui::SliderFloat("Pitch", &m_pitch, -pi<float>() / 2, pi<float>() / 2,
@@ -155,9 +121,6 @@ void Application::renderGUI() {
 
   // helpful drawing options
   if (ImGui::CollapsingHeader("Drawing Options")) {
-    ImGui::Checkbox("Show axis", &m_show_axis);
-    ImGui::SameLine();
-    ImGui::Checkbox("Show grid", &m_show_grid);
     ImGui::Checkbox("Wireframe", &m_showWireframe);
     ImGui::SameLine();
     if (ImGui::Button("Screenshot"))

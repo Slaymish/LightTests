@@ -6,11 +6,18 @@ void TestTechnique::initialize() {
 }
 
 void TestTechnique::render(Scene &scene, Camera &camera) {
-  // Just get something on the screen
+  camera.update();
 
-  // Clear the screen
-  glClearColor(0.5f, 0.5f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // projection matrix
+  glm::mat4 proj = camera.getProjectionMatrix();
+
+  // view
+  glm::mat4 view = camera.getViewMatrix();
+
+  // draw objects
+  for (auto &object : scene.getObjects()) {
+    object->draw(view, proj);
+  }
 }
 
 void TestTechnique::cleanup() {

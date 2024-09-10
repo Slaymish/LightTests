@@ -1,4 +1,5 @@
 #include "Camera.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 Camera::Camera()
     : position(0.0f, 0.0f, 0.0f), direction(0.0f, 0.0f, -1.0f),

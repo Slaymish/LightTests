@@ -1,5 +1,4 @@
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
@@ -13,11 +12,11 @@ private:
   glm::vec3 direction;
   glm::vec3 up;
 
-  void update();
-
 public:
   Camera();
   ~Camera() = default;
+
+  void update();
 
   glm::mat4 getViewMatrix();
   glm::mat4 getProjectionMatrix();
