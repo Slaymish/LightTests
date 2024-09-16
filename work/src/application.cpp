@@ -44,11 +44,11 @@ Application::Application(GLFWwindow *window) : m_window(window) {
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   GLuint shader = sb.build();
 
+  // set a lighting technique 
+  m_renderer.setTechnique(new TestTechnique());
+
   // Initialize the scene and renderer
   m_renderer.initialize();
-
-  // Optionally set a lighting technique (e.g., PhotonMapping)
-  m_renderer.setTechnique(new TestTechnique());
 
   // Add an object to the scene
   Object *newObject = new Object();
@@ -83,7 +83,7 @@ void Application::render() {
              height); // set the viewport to draw to the entire window
 
   // clear the back-buffer
-  glClearColor(0.3f, 0.3f, 0.4f, 1.0f);
+  glClearColor(1,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // enable flags for normal/forward rendering
@@ -139,7 +139,7 @@ void Application::renderGUI() {
       m_renderer.setTechnique(new PhotonMapping());
     }
   }
-
+  
   // finish creating window
   ImGui::End();
 }

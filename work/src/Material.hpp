@@ -26,6 +26,7 @@ public:
 private:
   GLuint shader;
   std::string name = "Material";
+  glm::vec3 m_color = glm::vec3(0.8);
 
   // Material properties like textures, colors, etc.
 };

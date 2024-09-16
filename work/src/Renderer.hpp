@@ -14,7 +14,7 @@ public:
   void setTechnique(ILightTechnique *technique);
 
 private:
-  ILightTechnique *currentTechnique;
+	ILightTechnique* currentTechnique;
 };
 
 #endif // RENDERER_HPP

@@ -23,9 +23,6 @@ void Renderer::shutdown() {
 }
 
 void Renderer::setTechnique(ILightTechnique *technique) {
-  if (currentTechnique) {
-    currentTechnique->cleanup();
-  }
   currentTechnique = technique;
   if (currentTechnique) {
     currentTechnique->initialize();

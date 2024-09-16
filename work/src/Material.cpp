@@ -1,5 +1,6 @@
 // Material.cpp
 #include "Material.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 Material::Material(GLuint s) : shader(s) {}
 
@@ -17,11 +18,9 @@ void Material::setUniforms(glm::mat4 view, glm::mat4 proj) {
   // uniform mat 4uProjectionMatrix
   // uniform mat4 uModelViewMatrix;
 
-  // Get the uniform locations
-  GLint uProjectionMatrix = glGetUniformLocation(shader, "uProjectionMatrix");
-  GLint uModelViewMatrix = glGetUniformLocation(shader, "uModelViewMatrix");
-
-  // Set the uniforms
-  glUniformMatrix4fv(uProjectionMatrix, 1, GL_FALSE, &proj[0][0]);
-  glUniformMatrix4fv(uModelViewMatrix, 1, GL_FALSE, &view[0][0]);
+  glUniformMatrix4fv(glGetUniformLocation(shader, "uProjectionMatrix"), 1,
+      false, value_ptr(proj));
+  glUniformMatrix4fv(glGetUniformLocation(shader, "uModelViewMatrix"), 1, false,
+      value_ptr(view));
+  glUniform3fv(glGetUniformLocation(shader, "uColor"), 1, value_ptr(m_color));
 }
