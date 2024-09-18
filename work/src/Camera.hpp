@@ -1,37 +1,46 @@
-#include <glm/glm.hpp>
 
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#pragma once
 
+// std
+#include <chrono>
+
+// project
+#include "ray.hpp"
+
+// Simple camera class that stores its world position/rotation
+// and the fovy with that imagesize
 class Camera {
 private:
-  glm::mat4 viewMatrix;
-  glm::mat4 projectionMatrix;
+  // position / orientation / fovy
+  glm::vec3 m_position{0};
+  float m_pitch = 0;
+  float m_yaw = 0;
+  glm::mat4 m_rotation;
+  float m_fovy = 45;
 
-  glm::vec3 position;
-  glm::vec3 direction;
-  glm::vec3 up;
+  // what is the size of the image we have to generate rays for
+  glm::vec2 m_image_size{1};
 
 public:
-  Camera();
-  ~Camera() = default;
+  Camera() { setPositionOrientation(m_position, m_yaw, m_pitch); }
 
-  void update();
+  // feild of view on the y-axis
+  // ie. what is the angle of how much we can see vertically
 
-  glm::mat4 getViewMatrix();
-  glm::mat4 getProjectionMatrix();
+  // typical get methods
+  glm::vec3 position() { return m_position; }
+  float yaw() { return m_yaw; }
+  float pitch() { return m_pitch; }
 
-  glm::vec3 getPosition();
-  glm::vec3 getDirection();
-  glm::vec3 getUp();
+  // typical set methods
+  void setPositionOrientation(const glm::vec3 &pos, float yaw, float pitch);
+  void setImageSize(const glm::vec2 &size) {
+    m_image_size = size;
+    setPositionOrientation(m_position, m_yaw, m_pitch);
+  }
 
-  // void setViewMatrix(glm::mat4 viewMatrix);
-  void setProjectionMatrix(glm::mat4 projectionMatrix);
+  void setFovy(float fovy) { m_fovy = fovy; }
 
-  // Setters
-  void setPosition(const glm::vec3 &pos);
-  void setDirection(const glm::vec3 &dir);
-  void setUp(const glm::vec3 &up);
+  // converts a position in screen coordinates into a ray in world coordinates
+  Ray generateRay(const glm::vec2 &pixel);
 };
-
-#endif // CAMERA_HPP

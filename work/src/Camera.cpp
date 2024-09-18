@@ -1,30 +1,69 @@
-#include "Camera.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <iostream>
+
+// glm
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera()
-    : position(0.0f, 0.0f, 0.0f), direction(0.0f, 0.0f, -1.0f),
-      up(0.0f, 1.0f, 0.0f) {}
+// project
+#include "camera.hpp"
+#include "opengl.hpp"
 
-void Camera::setPosition(const glm::vec3 &pos) { position = pos; }
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
-void Camera::setDirection(const glm::vec3 &dir) { direction = dir; }
+using namespace std;
+using namespace glm;
 
-void Camera::setUp(const glm::vec3 &up) { this->up = up; }
+void Camera::setPositionOrientation(const vec3 &pos, float yaw, float pitch) {
+  m_position = pos;
+  m_yaw = yaw;
+  m_pitch = pitch;
 
-glm::vec3 Camera::getPosition() { return position; }
+  // update rotation matrix (based on yaw and pitch)
+  m_rotation = rotate(mat4(1), -m_yaw, vec3(0, 1, 0)) * 
+      rotate(mat4(1), -m_pitch, vec3(1, 0, 0)); 
 
-glm::vec3 Camera::getDirection() { return direction; }
-
-glm::vec3 Camera::getUp() { return up; }
-
-void Camera::setProjectionMatrix(glm::mat4 projectionMatrix) {
-  this->projectionMatrix = projectionMatrix;
 }
 
-glm::mat4 Camera::getViewMatrix() { return viewMatrix; }
+Ray Camera::generateRay(const vec2 &pixel) {
+  //-------------------------------------------------------------
+  // [Assignment] :
+  // Generate a ray in the scene using the camera position,
+  // rotation, field of view on the y axis (fovy), and the image
+  // size. The pixel is given in image coordinates [0, imagesize]
+  // This COULD be done by first creating the ray in ViewSpace
+  // then transforming it by the position and rotation to get
+  // it into worldspace.
+  //-------------------------------------------------------------
 
-glm::mat4 Camera::getProjectionMatrix() { return projectionMatrix; }
+  Ray ray;
 
-void Camera::update() {
-  viewMatrix = glm::lookAt(position, position + direction, up);
+  // Image dimensions
+  float imageWidth = float(m_image_size.x);
+  float imageHeight = float(m_image_size.y);
+
+  // Convert Pixel to NDC
+  float ndcX = (2.0f * pixel.x / imageWidth) - 1.0f;
+  float ndcY = (2.0f * pixel.y / imageHeight) - 1.0f;
+
+  // Compute Camera Space Coordinates
+  float aspect = imageWidth / imageHeight;
+  float tanFovy = tan(radians(m_fovy) / 2.0f);
+  float cameraX = ndcX * aspect * tanFovy;
+  float cameraY = ndcY * tanFovy;
+  vec3 rayDirCameraSpace = normalize(vec3(cameraX, cameraY, -1.0f));
+
+  glm::quat rotation = glm::quat(m_rotation); 
+  glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
+
+  // Transform the Ray to World Space
+  mat4 viewToWorld = inverse(translate(mat4(1.0f), m_position) * rotationMatrix);
+  vec3 rayDirWorldSpace = vec3(viewToWorld * vec4(rayDirCameraSpace, 0.0f));
+
+
+  ray.origin = m_position;
+  ray.direction = rayDirWorldSpace; // Direction in world space
+
+  return ray;
 }

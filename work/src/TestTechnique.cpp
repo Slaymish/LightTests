@@ -1,11 +1,12 @@
 #include "TestTechnique.hpp"
 #include <GLFW/glfw3.h>
 
-void TestTechnique::initialize() {
+void TestTechnique::initialize(Scene &scene) {
   // Initialize resources ??
+  this->scene = &scene;
 }
 
-void TestTechnique::render(Scene &scene, Camera &camera) {
+void TestTechnique::render(Camera &camera) {
   camera.update();
 
   // projection matrix
@@ -15,7 +16,7 @@ void TestTechnique::render(Scene &scene, Camera &camera) {
   glm::mat4 view = camera.getViewMatrix();
 
   // draw objects
-  for (auto &object : scene.getObjects()) {
+  for (auto &object : scene->getObjects()) {
     object->draw(view, proj);
   }
 }

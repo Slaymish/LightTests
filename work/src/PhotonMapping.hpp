@@ -4,9 +4,12 @@
 #include "ILightTechnique.hpp"
 
 class PhotonMapping : public ILightTechnique {
+private:
+  Scene *scene;
+
 public:
-  void initialize() override;
-  void render(Scene &scene, Camera &camera) override;
+  void initialize(Scene &scene) override;
+  void render(Camera &camera) override;
   void cleanup() override;
 };
 

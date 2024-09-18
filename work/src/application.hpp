@@ -29,13 +29,12 @@ struct basic_model {
 class Application {
 private:
   // window
-  glm::vec2 m_windowsize;
   GLFWwindow *m_window;
 
-  // oribital camera
-  float m_pitch = .86;
-  float m_yaw = -.86;
-  float m_distance = 20;
+  // time-keeping
+  float m_dt_last;
+  std::chrono::steady_clock::time_point m_time_last =
+      std::chrono::steady_clock::now();
 
   // last input
   bool m_leftMouseDown = false;
@@ -46,9 +45,9 @@ private:
   bool m_show_grid = false;
   bool m_showWireframe = false;
 
-  Renderer m_renderer;
   Scene m_scene;
-  Camera m_camera;
+  std::unique_ptr<Camera> m_camera = nullptr;
+  std::unique_ptr<Renderer> m_renderer = nullptr;
 
 public:
   // setup
@@ -68,4 +67,5 @@ public:
   void scrollCallback(double xoffset, double yoffset);
   void keyCallback(int key, int scancode, int action, int mods);
   void charCallback(unsigned int c);
+  void updateCameraMovement(int w, int h);
 };

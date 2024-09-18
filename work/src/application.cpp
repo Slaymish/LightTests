@@ -11,6 +11,8 @@
 // project
 #include "PhotonMapping.hpp"
 #include "TestTechnique.hpp"
+#include "ThreePassTechnique.hpp"
+#include "PathTracer.hpp"
 #include "application.hpp"
 #include "cgra/cgra_geometry.hpp"
 #include "cgra/cgra_gui.hpp"
@@ -138,10 +140,67 @@ void Application::renderGUI() {
     if (ImGui::Button("Photon Mapping")) {
       m_renderer.setTechnique(new PhotonMapping());
     }
+    if (ImGui::Button("Three Pass")) {
+      m_renderer.setTechnique(new ThreePassTechnique());
+    }
+    if (ImGui::Button("Path Tracing")) {
+      m_renderer.setTechnique(new PathTracer());
+    }
   }
   
   // finish creating window
   ImGui::End();
+}
+
+void Application::updateCameraMovement(int w, int h) {
+  //m_restart_render = false;
+  const float rot_speed = 600;
+  const float m_speed = 2;
+
+  // calculate movement directions
+  vec3 up = vec3(0, 1, 0);
+  vec3 forward = normalize(
+      reject(rotate(mat4(1), m_camera->yaw(), up) * vec4(0, 0, -1, 0), up));
+  vec3 side = normalize(cross(forward, up));
+
+  vec3 pos = m_camera->position();
+  float yaw = m_camera->yaw();
+  float pitch = m_camera->pitch();
+
+  double x, y;
+  glfwGetCursorPos(m_window, &x, &y);
+  x -= w * 0.5;
+  y -= h * 0.5;
+  if (abs(x) > 0.5 || abs(y) > 0.5) {
+    yaw += float(-x / rot_speed);
+    pitch += float(-y / rot_speed);
+    pitch = std::clamp(pitch, -0.49f * pi<float>(), 0.49f * pi<float>());
+    glfwSetCursorPos(m_window, w * 0.5, h * 0.5);
+    m_restart_render = true;
+  }
+
+  vec3 move{0};
+
+  if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+    move += forward;
+  if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+    move -= forward;
+  if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+    move -= side;
+  if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+    move += side;
+  if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    move -= up;
+  if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    move += up;
+
+  if (length(move) > 0.1f) {
+    auto dpos = normalize(move) * m_speed * m_dt_last;
+    pos += dpos;
+    m_restart_render = true;
+  }
+
+  m_camera->setPositionOrientation(pos, yaw, pitch);
 }
 
 void Application::cursorPosCallback(double xpos, double ypos) {

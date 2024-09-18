@@ -1,3 +1,6 @@
 {
-    "cmake.sourceDirectory": "C:/Users/hamis/Documents/Coding/LIghtt/LightTests/work"
+    "cmake.sourceDirectory": "C:/Users/hamis/Documents/Coding/LIghtt/LightTests/work",
+    "files.associations": {
+        "limits": "cpp"
+    }
 }
