@@ -46,6 +46,10 @@ Application::Application(GLFWwindow *window) : m_window(window) {
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   GLuint shader = sb.build();
 
+  // Set the camera in the scene (unique_ptr)
+  m_camera = std::make_unique<Camera>();
+  m_renderer = std::make_unique<Renderer>();
+
   // Initialize the scene and renderer
   m_renderer->initialize(m_scene);
   m_renderer->setTechnique(new TestTechnique());
@@ -64,9 +68,6 @@ Application::Application(GLFWwindow *window) : m_window(window) {
   light->setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
   light->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
   m_scene.addLight(light);
-
-  // Set the camera in the scene (unique_ptr)
-  m_camera = std::make_unique<Camera>();
 }
 
 void Application::render() {
@@ -88,7 +89,8 @@ void Application::render() {
 
   glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
-  updateCameraMovement(width, height);
+  if (m_moving)
+    updateCameraMovement(width, height);
 
   // Call the renderer to render the scene
   m_renderer->renderFrame(m_camera.get());
@@ -101,15 +103,10 @@ void Application::renderGUI() {
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
   ImGui::Begin("Options", 0);
 
+  ImGui::Text("'P' to toggle camera movement");
+
   ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-  // display current camera parameters
-
-  // ImGui::SliderFloat("Pitch", &m_pitch, -pi<float>() / 2, pi<float>() / 2,
-  //  "%.2f");
-  // ImGui::SliderFloat("Yaw", &m_yaw, -pi<float>(), pi<float>(), "%.2f");
-  // ImGui::SliderFloat("Distance", &m_distance, 0, 100, "%.2f", 2.0f);
 
   // helpful drawing options
   if (ImGui::CollapsingHeader("Drawing Options")) {

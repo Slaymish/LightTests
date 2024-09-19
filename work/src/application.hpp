@@ -38,6 +38,7 @@ private:
 
   // drawing flags
   bool m_showWireframe = false;
+  bool m_moving = false;
 
   Scene m_scene;
   std::unique_ptr<Camera> m_camera = nullptr;
@@ -55,4 +56,6 @@ public:
   void render();
   void renderGUI();
   void updateCameraMovement(int w, int h);
+  void setMoving(bool moving) { m_moving = moving; }
+  bool isMoving() { return m_moving; }
 };

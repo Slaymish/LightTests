@@ -16,7 +16,7 @@ private:
   float m_pitch = 0;
   float m_yaw = 0;
   glm::mat4 m_rotation;
-  float m_fovy = 45;
+  float m_fovy = 120;
 
   // what is the size of the image we have to generate rays for
   glm::vec2 m_image_size{1};

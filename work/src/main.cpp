@@ -175,6 +175,11 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
   ImGuiIO &io = ImGui::GetIO();
   if (io.WantCaptureKeyboard)
     return;
+
+  // if letter == 'p' then pause the camera movement
+  if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+    application_ptr->setMoving(!application_ptr->isMoving());
+  }
 }
 
 void charCallback(GLFWwindow *win, unsigned int c) {
