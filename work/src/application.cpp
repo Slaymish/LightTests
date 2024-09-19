@@ -103,8 +103,6 @@ void Application::renderGUI() {
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
   ImGui::Begin("Options", 0);
 
-  ImGui::Text("'P' to toggle camera movement");
-
   ImGui::Text("Application %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -116,6 +114,52 @@ void Application::renderGUI() {
       rgba_image::screenshot(true);
 
     ImGui::Separator();
+  }
+
+  if (ImGui::CollapsingHeader("Camera Options")) {
+    // Camera Position
+    vec3 pos = m_camera->position();
+    if (ImGui::SliderFloat("X", &pos.x, -10, 10)) {
+      m_camera->setPositionOrientation(pos, m_camera->yaw(), m_camera->pitch());
+    }
+    if (ImGui::SliderFloat("Y", &pos.y, -10, 10)) {
+      m_camera->setPositionOrientation(pos, m_camera->yaw(), m_camera->pitch());
+    }
+    if (ImGui::SliderFloat("Z", &pos.z, -10, 10)) {
+      m_camera->setPositionOrientation(pos, m_camera->yaw(), m_camera->pitch());
+    }
+
+    // Camera Orientation
+    float yaw = m_camera->yaw();
+    if (ImGui::SliderFloat("Yaw", &yaw, -pi<float>(), pi<float>())) {
+      m_camera->setPositionOrientation(m_camera->position(), yaw,
+                                       m_camera->pitch());
+    }
+    float pitch = m_camera->pitch();
+    if (ImGui::SliderFloat("Pitch", &pitch, -pi<float>() / 2,
+                           pi<float>() / 2)) {
+      m_camera->setPositionOrientation(m_camera->position(), m_camera->yaw(),
+                                       pitch);
+    }
+
+    // fov
+    float fov = m_camera->fovy();
+    if (ImGui::SliderFloat("Field of View", &fov, 1, 179)) {
+      m_camera->setFovy(fov);
+    }
+
+    if (ImGui::Button("Toggle Camera Movement (P)")) {
+      m_moving = !m_moving;
+    }
+
+    ImGui::Separator();
+
+    // Camera Movement
+    ImGui::Text("Camera Movement");
+    ImGui::Text("WASD - Move Camera");
+    ImGui::Text("Shift - Move Down");
+    ImGui::Text("Space - Move Up");
+    ImGui::Text("Mouse - Look Around");
   }
 
   // Render Technique
@@ -131,7 +175,7 @@ void Application::renderGUI() {
       m_renderer->setTechnique(new ThreePassTechnique());
     }
     if (ImGui::Button("Path Tracing")) {
-      // m_renderer->setTechnique(new PathTracer());
+      m_renderer->setTechnique(new PathTracer());
     }
   }
 

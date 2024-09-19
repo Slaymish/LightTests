@@ -45,6 +45,7 @@ public:
   glm::vec2 imageSize() { return m_image_size; }
 
   void setFovy(float fovy) { m_fovy = fovy; }
+  float fovy() { return m_fovy; }
 
   // converts a position in screen coordinates into a ray in world coordinates
   Ray generateRay(const glm::vec2 &pixel);
