@@ -5,11 +5,11 @@
 
 class TestTechnique : public ILightTechnique {
 private:
-  Scene *scene; 
+  Scene *scene;
 
 public:
   void initialize(Scene &scene) override;
-  void render(Camera &camera) override;
+  void render(Camera *camera) override;
   void cleanup() override;
 };
 

@@ -145,7 +145,6 @@ void cursorPosCallback(GLFWwindow *, double xpos, double ypos) {
   ImGuiIO &io = ImGui::GetIO();
   if (io.WantCaptureMouse)
     return;
-  application_ptr->cursorPosCallback(xpos, ypos);
 }
 
 void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
@@ -156,7 +155,6 @@ void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
   ImGuiIO &io = ImGui::GetIO();
   if (io.WantCaptureMouse)
     return;
-  application_ptr->mouseButtonCallback(button, action, mods);
 }
 
 void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
@@ -167,7 +165,6 @@ void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
   ImGuiIO &io = ImGui::GetIO();
   if (io.WantCaptureMouse)
     return;
-  application_ptr->scrollCallback(xoffset, yoffset);
 }
 
 void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
@@ -178,7 +175,6 @@ void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
   ImGuiIO &io = ImGui::GetIO();
   if (io.WantCaptureKeyboard)
     return;
-  application_ptr->keyCallback(key, scancode, action, mods);
 }
 
 void charCallback(GLFWwindow *win, unsigned int c) {
@@ -189,7 +185,6 @@ void charCallback(GLFWwindow *win, unsigned int c) {
   ImGuiIO &io = ImGui::GetIO();
   if (io.WantTextInput)
     return;
-  application_ptr->charCallback(c);
 }
 
 // function to translate source to string

@@ -7,14 +7,15 @@
 
 class Renderer {
 public:
-  void initialize();
-  void renderFrame(Scene &scene, Camera &camera);
+  void initialize(Scene &scene);
+  void renderFrame(Camera *camera);
   void shutdown();
 
   void setTechnique(ILightTechnique *technique);
 
 private:
-	ILightTechnique* currentTechnique;
+  ILightTechnique *currentTechnique;
+  Scene *scene;
 };
 
 #endif // RENDERER_HPP

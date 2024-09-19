@@ -7,7 +7,7 @@
 class ILightTechnique {
 public:
   virtual void initialize(Scene &scene) = 0;
-  virtual void render(Camera &camera) = 0;
+  virtual void render(Camera *camera) = 0;
   virtual void cleanup() = 0;
   virtual ~ILightTechnique() = default;
 };

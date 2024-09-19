@@ -32,12 +32,17 @@ public:
   float yaw() { return m_yaw; }
   float pitch() { return m_pitch; }
 
+  glm::mat4 viewMatrix() const;
+  glm::mat4 projectionMatrix() const;
+
   // typical set methods
   void setPositionOrientation(const glm::vec3 &pos, float yaw, float pitch);
   void setImageSize(const glm::vec2 &size) {
     m_image_size = size;
     setPositionOrientation(m_position, m_yaw, m_pitch);
   }
+
+  glm::vec2 imageSize() { return m_image_size; }
 
   void setFovy(float fovy) { m_fovy = fovy; }
 

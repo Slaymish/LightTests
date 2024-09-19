@@ -1,8 +1,11 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include "Camera.hpp"
 #include "Material.hpp"
+#include "RayHit.hpp"
 #include "cgra/cgra_mesh.hpp"
+#include "ray.hpp"
 #include <glm/glm.hpp>
 
 using namespace cgra;
@@ -21,7 +24,9 @@ public:
   gl_mesh getMesh() { return mesh; }
   void setMesh(const gl_mesh &m) { mesh = m; }
 
-  void draw(const glm::mat4 &view, const glm::mat4 &proj);
+  void draw(Camera *camera);
+
+  RayHit intersect(const Ray &ray);
 
 private:
   Material *material;

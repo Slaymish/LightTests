@@ -23,10 +23,17 @@ public:
   void setName(const std::string &n) { name = n; }
   std::string getName() { return name; }
 
+  void setColor(const glm::vec3 &c) { m_color = c; }
+  glm::vec3 getColor() { return m_color; }
+
+  void setIsLight(bool l) { m_isLight = l; }
+  bool getIsLight() { return m_isLight; }
+
 private:
   GLuint shader;
   std::string name = "Material";
   glm::vec3 m_color = glm::vec3(0.8);
+  bool m_isLight = false;
 
   // Material properties like textures, colors, etc.
 };

@@ -6,18 +6,10 @@ void TestTechnique::initialize(Scene &scene) {
   this->scene = &scene;
 }
 
-void TestTechnique::render(Camera &camera) {
-  camera.update();
-
-  // projection matrix
-  glm::mat4 proj = camera.getProjectionMatrix();
-
-  // view
-  glm::mat4 view = camera.getViewMatrix();
-
+void TestTechnique::render(Camera *camera) {
   // draw objects
   for (auto &object : scene->getObjects()) {
-    object->draw(view, proj);
+    object->draw(camera);
   }
 }
 

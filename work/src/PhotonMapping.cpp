@@ -6,7 +6,7 @@ void PhotonMapping::initialize(Scene &scene) {
   this->scene = &scene;
 }
 
-void PhotonMapping::render(Camera &camera) {
+void PhotonMapping::render(Camera *camera) {
   // Perform the Photon Mapping rendering process
   // Handle photon emission, light gathering, etc.
 }

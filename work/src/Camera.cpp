@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // project
-#include "camera.hpp"
+#include "Camera.hpp"
 #include "opengl.hpp"
 
 #include <glm/glm.hpp>
@@ -15,15 +15,35 @@
 using namespace std;
 using namespace glm;
 
+mat4 Camera::viewMatrix() const {
+  // Create a translation matrix that represents the camera position
+  mat4 translationMatrix = translate(mat4(1.0f), m_position);
+
+  // Create a rotation matrix that represents the camera rotation
+  mat4 rotationMatrix = mat4_cast(glm::quat(m_rotation));
+
+  // Combine the translation and rotation matrices
+  mat4 viewMatrix = rotationMatrix * translationMatrix;
+
+  return viewMatrix;
+}
+
+mat4 Camera::projectionMatrix() const {
+  // Create a perspective projection matrix
+  mat4 projectionMatrix = perspective(
+      radians(m_fovy), m_image_size.x / m_image_size.y, 0.1f, 100.0f);
+
+  return projectionMatrix;
+}
+
 void Camera::setPositionOrientation(const vec3 &pos, float yaw, float pitch) {
   m_position = pos;
   m_yaw = yaw;
   m_pitch = pitch;
 
   // update rotation matrix (based on yaw and pitch)
-  m_rotation = rotate(mat4(1), -m_yaw, vec3(0, 1, 0)) * 
-      rotate(mat4(1), -m_pitch, vec3(1, 0, 0)); 
-
+  m_rotation = rotate(mat4(1), -m_yaw, vec3(0, 1, 0)) *
+               rotate(mat4(1), -m_pitch, vec3(1, 0, 0));
 }
 
 Ray Camera::generateRay(const vec2 &pixel) {
@@ -54,13 +74,13 @@ Ray Camera::generateRay(const vec2 &pixel) {
   float cameraY = ndcY * tanFovy;
   vec3 rayDirCameraSpace = normalize(vec3(cameraX, cameraY, -1.0f));
 
-  glm::quat rotation = glm::quat(m_rotation); 
+  glm::quat rotation = glm::quat(m_rotation);
   glm::mat4 rotationMatrix = glm::mat4_cast(rotation);
 
   // Transform the Ray to World Space
-  mat4 viewToWorld = inverse(translate(mat4(1.0f), m_position) * rotationMatrix);
+  mat4 viewToWorld =
+      inverse(translate(mat4(1.0f), m_position) * rotationMatrix);
   vec3 rayDirWorldSpace = vec3(viewToWorld * vec4(rayDirCameraSpace, 0.0f));
-
 
   ray.origin = m_position;
   ray.direction = rayDirWorldSpace; // Direction in world space

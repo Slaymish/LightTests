@@ -9,10 +9,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // project
+#include "PathTracer.hpp"
 #include "PhotonMapping.hpp"
 #include "TestTechnique.hpp"
 #include "ThreePassTechnique.hpp"
-#include "PathTracer.hpp"
 #include "application.hpp"
 #include "cgra/cgra_geometry.hpp"
 #include "cgra/cgra_gui.hpp"
@@ -46,11 +46,9 @@ Application::Application(GLFWwindow *window) : m_window(window) {
                 CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
   GLuint shader = sb.build();
 
-  // set a lighting technique 
-  m_renderer.setTechnique(new TestTechnique());
-
   // Initialize the scene and renderer
-  m_renderer.initialize();
+  m_renderer->initialize(m_scene);
+  m_renderer->setTechnique(new TestTechnique());
 
   // Add an object to the scene
   Object *newObject = new Object();
@@ -67,11 +65,8 @@ Application::Application(GLFWwindow *window) : m_window(window) {
   light->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
   m_scene.addLight(light);
 
-  // Set the camera in the scene
-  m_camera = Camera();
-  m_camera.setPosition(glm::vec3(0.0, 0.0, m_distance));
-  m_camera.setDirection(glm::vec3(0.0, 0.0, -1.0));
-  m_camera.setUp(glm::vec3(0.0, 1.0, 0.0));
+  // Set the camera in the scene (unique_ptr)
+  m_camera = std::make_unique<Camera>();
 }
 
 void Application::render() {
@@ -80,28 +75,23 @@ void Application::render() {
   int width, height;
   glfwGetFramebufferSize(m_window, &width, &height);
 
-  m_windowsize = vec2(width, height); // update window size
   glViewport(0, 0, width,
              height); // set the viewport to draw to the entire window
 
   // clear the back-buffer
-  glClearColor(1,0,0,1);
+  glClearColor(1, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // enable flags for normal/forward rendering
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
-  // projection matrix
-  mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
-
-  // Set the camera in the scene
-  m_camera.setProjectionMatrix(proj);
-
   glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 
+  updateCameraMovement(width, height);
+
   // Call the renderer to render the scene
-  m_renderer.renderFrame(m_scene, m_camera);
+  m_renderer->renderFrame(m_camera.get());
 }
 
 void Application::renderGUI() {
@@ -134,26 +124,30 @@ void Application::renderGUI() {
   // Render Technique
   if (ImGui::CollapsingHeader("Render Technique")) {
     if (ImGui::Button("Test Technique")) {
-      m_renderer.setTechnique(new TestTechnique());
+      m_renderer->setTechnique(new TestTechnique());
     }
     ImGui::SameLine();
     if (ImGui::Button("Photon Mapping")) {
-      m_renderer.setTechnique(new PhotonMapping());
+      m_renderer->setTechnique(new PhotonMapping());
     }
     if (ImGui::Button("Three Pass")) {
-      m_renderer.setTechnique(new ThreePassTechnique());
+      m_renderer->setTechnique(new ThreePassTechnique());
     }
     if (ImGui::Button("Path Tracing")) {
-      m_renderer.setTechnique(new PathTracer());
+      // m_renderer->setTechnique(new PathTracer());
     }
   }
-  
+
   // finish creating window
   ImGui::End();
 }
 
+vec3 reject(const vec3 &v, const vec3 &direction) {
+  vec3 projection = dot(v, direction) * direction;
+  return v - projection;
+}
+
 void Application::updateCameraMovement(int w, int h) {
-  //m_restart_render = false;
   const float rot_speed = 600;
   const float m_speed = 2;
 
@@ -176,7 +170,6 @@ void Application::updateCameraMovement(int w, int h) {
     pitch += float(-y / rot_speed);
     pitch = std::clamp(pitch, -0.49f * pi<float>(), 0.49f * pi<float>());
     glfwSetCursorPos(m_window, w * 0.5, h * 0.5);
-    m_restart_render = true;
   }
 
   vec3 move{0};
@@ -197,56 +190,7 @@ void Application::updateCameraMovement(int w, int h) {
   if (length(move) > 0.1f) {
     auto dpos = normalize(move) * m_speed * m_dt_last;
     pos += dpos;
-    m_restart_render = true;
   }
 
   m_camera->setPositionOrientation(pos, yaw, pitch);
-}
-
-void Application::cursorPosCallback(double xpos, double ypos) {
-  if (m_leftMouseDown) {
-    vec2 whsize = m_windowsize / 2.0f;
-
-    // clamp the pitch to [-pi/2, pi/2]
-    m_pitch += float(
-        acos(glm::clamp((m_mousePosition.y - whsize.y) / whsize.y, -1.0f,
-                        1.0f)) -
-        acos(glm::clamp((float(ypos) - whsize.y) / whsize.y, -1.0f, 1.0f)));
-    m_pitch = float(glm::clamp(m_pitch, -pi<float>() / 2, pi<float>() / 2));
-
-    // wrap the yaw to [-pi, pi]
-    m_yaw += float(
-        acos(glm::clamp((m_mousePosition.x - whsize.x) / whsize.x, -1.0f,
-                        1.0f)) -
-        acos(glm::clamp((float(xpos) - whsize.x) / whsize.x, -1.0f, 1.0f)));
-    if (m_yaw > pi<float>())
-      m_yaw -= float(2 * pi<float>());
-    else if (m_yaw < -pi<float>())
-      m_yaw += float(2 * pi<float>());
-  }
-
-  // updated mouse position
-  m_mousePosition = vec2(xpos, ypos);
-}
-
-void Application::mouseButtonCallback(int button, int action, int mods) {
-  (void)mods; // currently un-used
-
-  // capture is left-mouse down
-  if (button == GLFW_MOUSE_BUTTON_LEFT)
-    m_leftMouseDown =
-        (action == GLFW_PRESS); // only other option is GLFW_RELEASE
-}
-
-void Application::scrollCallback(double xoffset, double yoffset) {
-  (void)xoffset; // currently un-used
-  m_distance *= pow(1.1f, -yoffset);
-}
-
-void Application::keyCallback(int key, int scancode, int action, int mods) {
-  (void)key, (void)scancode, (void)action, (void)mods; // currently un-used
-}
-
-void Application::charCallback(unsigned int c) {
-  (void)c; // currently un-used
 }

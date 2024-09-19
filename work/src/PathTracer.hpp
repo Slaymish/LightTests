@@ -6,12 +6,14 @@
 
 class PathTracer : public ILightTechnique {
 private:
-    int maxDepth = 5;
-    Scene *scene;
+  int maxDepth = 5;
+  Scene *scene;
 
 public:
+  PathTracer() = default;
+  virtual ~PathTracer();
   void initialize(Scene &scene) override;
-  void render(Camera &camera) override;
+  void render(Camera *camera) override;
   void cleanup() override;
   virtual glm::vec3 sampleRay(const Ray &ray, int depth) = 0;
 };

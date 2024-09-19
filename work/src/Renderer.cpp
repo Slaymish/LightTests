@@ -2,15 +2,16 @@
 #include "Renderer.hpp"
 #include <iostream>
 
-void Renderer::initialize() {
+void Renderer::initialize(Scene &scene) {
+  this->scene = &scene;
   if (currentTechnique) {
-    currentTechnique->initialize();
+    currentTechnique->initialize(scene);
   }
 }
 
-void Renderer::renderFrame(Scene &scene, Camera &camera) {
+void Renderer::renderFrame(Camera *camera) {
   if (currentTechnique) {
-    currentTechnique->render(scene, camera);
+    currentTechnique->render(camera);
   } else {
     std::cerr << "No technique set for rendering" << std::endl;
   }
@@ -25,6 +26,6 @@ void Renderer::shutdown() {
 void Renderer::setTechnique(ILightTechnique *technique) {
   currentTechnique = technique;
   if (currentTechnique) {
-    currentTechnique->initialize();
+    currentTechnique->initialize(*scene);
   }
 }

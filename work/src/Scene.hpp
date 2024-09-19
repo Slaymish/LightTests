@@ -3,6 +3,8 @@
 
 #include "Light.hpp"
 #include "Object.hpp"
+#include "RayHit.hpp"
+#include "ray.hpp"
 #include <vector>
 
 class Scene {
@@ -11,6 +13,8 @@ public:
   void addObject(Object *obj);
   std::vector<Object *> getObjects();
   std::vector<Light *> getLights();
+
+  RayHit intersect(const Ray &ray);
 
 private:
   std::vector<Object *> objects;
